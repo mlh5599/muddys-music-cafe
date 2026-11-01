@@ -1,5 +1,6 @@
 # Emergency path: redeploy an existing release tag's signed image through the
-# same receiver. It builds nothing; it only picks an image that already shipped.
+# same host-side script. It builds nothing; it only picks an image that already
+# shipped.
 name: Redeploy a release
 on:
   workflow_dispatch:
@@ -11,18 +12,13 @@ permissions:
   contents: read
   packages: read
 jobs:
-  redeploy:
+  resolve:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
-    concurrency:
-      group: deploy
-      cancel-in-progress: false
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
     steps:
-      - uses: actions/checkout@v7
-        with:
-          sparse-checkout: .github/actions/deploy
-      - uses: docker/login-action@v4
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -35,11 +31,15 @@ jobs:
           [[ "$TAG" =~ ^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+$ ]] || { echo "::error::not a release tag"; exit 1; }
           digest=$(docker buildx imagetools inspect "ghcr.io/${{ github.repository }}:$TAG" --format '{{.Manifest.Digest}}')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-      - uses: ./.github/actions/deploy
-        with:
-          url: ${{ secrets.DEPLOY_URL }}
-          client-id: ${{ secrets.DEPLOY_ACCESS_CLIENT_ID }}
-          client-secret: ${{ secrets.DEPLOY_ACCESS_CLIENT_SECRET }}
-          hmac-secret: ${{ secrets.DEPLOY_HMAC_SECRET }}
-          tag: ${{ inputs.tag }}
-          digest: ${{ steps.image.outputs.digest }}
+  redeploy:
+    needs: resolve
+    runs-on: [self-hosted, linux, deploy]
+    environment: production
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - env:
+          TAG: ${{ inputs.tag }}
+          DIGEST: ${{ needs.resolve.outputs.digest }}
+        run: sudo -n -u deploy /usr/local/lib/deploy-kit/deploy-app.sh muddys "$TAG" "$DIGEST"
