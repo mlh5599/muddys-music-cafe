@@ -15,6 +15,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	_ "time/tzdata" // the container image has no system zoneinfo; the site shows times in a named zone
 
 	"github.com/mlh5599/muddys-music-cafe/server/internal/admin"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/api"
