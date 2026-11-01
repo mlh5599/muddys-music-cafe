@@ -22,7 +22,7 @@ SteadySum):
 - **Packaging**: one Docker image (multi-stage `node` -> `go build CGO_ENABLED=0` -> `alpine`); the Go binary `go:embed`s the built admin and the public templates/assets
 - **Uploads**: photos and posters are validated, re-encoded and stored under the data directory (`<data-dir>/uploads`), served by the app
 - **Access**: no in-app login. `/admin` and the write API are expected to sit behind an access-gating layer (Cloudflare Access, VPN, reverse proxy auth). Public pages need no login.
-- **Config**: flags only: `-addr`, `-metrics-addr`, `-data-dir`
+- **Config**: flags only: `-addr`, `-metrics-addr`, `-data-dir`, `-access-team-domain`, `-access-aud` (identifiers, not secrets; `-dev-no-auth` exists for local development and only works on a loopback address)
 
 The repo contains nothing specific to where it is hosted. Deployment lives
 elsewhere.
@@ -127,7 +127,7 @@ Alfa Slab One (headings), Yellowtail (script accents), Inter (body). See
 - [x] **Phase 2: Storage.** SQLite schema + migrations, store packages with tests.
 - [x] **Phase 3: Seed import.** `server -seed` loads the POC's 22 DJs, 28 hosts, 84 partners, events and settings into an empty database (refuses if content exists).
 - [x] **Phase 4: Public pages.** `/`, `/djs`, `/hosts` rendered from the database; static assets and uploads served with caching; visual check against the POC done.
-- [ ] **Phase 5: Admin API + uploads.** CRUD, image validation/resizing, tests.
+- [x] **Phase 5: Admin API + uploads.** JSON CRUD for events, DJs, hosts, partners and settings under `/api/admin`; picture upload (validated by content, rotated, resized, re-encoded); every route requires the access gate's signed identity assertion plus a CSRF check; locked unless configured (`-access-team-domain`, `-access-aud`).
 - [ ] **Phase 6: Admin UI.** Events, DJs, hosts, partners, settings.
 - [ ] **Phase 7: Containerize.** Verify the image builds and runs with a mounted data dir.
 - [ ] **Phase 8: Deploy.** Done outside this repo, with `/admin` behind an access gate.

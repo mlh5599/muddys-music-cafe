@@ -80,3 +80,14 @@ func TestRecoverMiddleware(t *testing.T) {
 		t.Fatalf("status = %d, want 500", rec.Code)
 	}
 }
+
+func TestAdminAPILockedByDefault(t *testing.T) {
+	mux := newTestMux(t)
+	for _, p := range []string{"/api/admin/events", "/api/admin/me"} {
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, p, nil))
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("%s status = %d, want 401", p, rec.Code)
+		}
+	}
+}

@@ -7,15 +7,17 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"github.com/mlh5599/muddys-music-cafe/server/internal/admin"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/site"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/webui"
 )
 
-// Deps holds the dependencies Register wires into route handlers. It grows as
-// storage and uploads land in later phases.
+// Deps holds the dependencies Register wires into route handlers.
 type Deps struct {
 	DB         *sql.DB
 	UploadsDir string
+	Verifier   *admin.Verifier // access-gate assertion checker; nil locks the admin API
+	DevNoAuth  bool            // development only: skip the assertion check
 }
 
 // Register attaches all public-facing routes to mux, each wrapped in the
@@ -28,6 +30,10 @@ func Register(mux *http.ServeMux, d Deps) error {
 		return err
 	}
 	mux.Handle("GET /healthz", withStandardMiddleware(http.HandlerFunc(healthz)))
+	// The admin API always requires a verified identity (or the dev bypass).
+	mux.Handle("/api/admin/", withStandardMiddleware(admin.New(admin.Config{
+		DB: d.DB, UploadsDir: d.UploadsDir, Verifier: d.Verifier, DevNoAuth: d.DevNoAuth,
+	})))
 	mux.Handle("/admin/", withStandardMiddleware(http.StripPrefix("/admin", webui.Handler())))
 	mux.Handle("/", withStandardMiddleware(siteHandler))
 	return nil

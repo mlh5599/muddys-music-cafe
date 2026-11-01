@@ -7,6 +7,7 @@ import (
 	"errors"
 	"flag"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mlh5599/muddys-music-cafe/server/internal/admin"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/api"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/seed"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/storage"
@@ -23,6 +25,9 @@ func main() {
 	addr := flag.String("addr", ":8080", "listen address")
 	metricsAddr := flag.String("metrics-addr", ":9090", "internal-only listen address for /metrics")
 	dataDir := flag.String("data-dir", "./data", "directory for persistent data (SQLite database, uploads)")
+	accessTeam := flag.String("access-team-domain", "", "access gate team domain; with -access-aud, enables the admin API")
+	accessAud := flag.String("access-aud", "", "access gate application audience tag")
+	devNoAuth := flag.Bool("dev-no-auth", false, "DEVELOPMENT ONLY: skip admin sign-in checks (loopback addresses only)")
 	seedFlag := flag.Bool("seed", false, "import the starter content into an empty database, then exit")
 	flag.Parse()
 
@@ -45,7 +50,26 @@ func main() {
 		return
 	}
 
-	if err := api.Register(mux, api.Deps{DB: db, UploadsDir: filepath.Join(*dataDir, "uploads")}); err != nil {
+	var verifier *admin.Verifier
+	switch {
+	case *devNoAuth:
+		if !isLoopback(*addr) {
+			log.Fatal("-dev-no-auth is only allowed when -addr is a loopback address (e.g. 127.0.0.1:8080)")
+		}
+		log.Print("WARNING: admin sign-in checks are disabled (-dev-no-auth)")
+	case *accessTeam != "" && *accessAud != "":
+		verifier, err = admin.NewVerifier(*accessTeam, *accessAud, nil)
+		if err != nil {
+			log.Fatalf("access gate config: %v", err)
+		}
+	default:
+		log.Print("admin API is locked: set -access-team-domain and -access-aud to enable it")
+	}
+
+	if err := api.Register(mux, api.Deps{
+		DB: db, UploadsDir: filepath.Join(*dataDir, "uploads"),
+		Verifier: verifier, DevNoAuth: *devNoAuth,
+	}); err != nil {
 		log.Fatalf("register routes: %v", err)
 	}
 
@@ -95,4 +119,17 @@ func newServer(addr string, h http.Handler) *http.Server {
 		IdleTimeout:       120 * time.Second,
 		MaxHeaderBytes:    1 << 16,
 	}
+}
+
+// isLoopback reports whether addr binds only to the local machine.
+func isLoopback(addr string) bool {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil || host == "" {
+		return false
+	}
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }

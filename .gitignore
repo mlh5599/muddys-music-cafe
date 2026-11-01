@@ -19,7 +19,8 @@ secrets/
 *.db
 *.db-shm
 *.db-wal
-uploads/
+/uploads/
+/data/uploads/
 
 # Build output
 bin/
