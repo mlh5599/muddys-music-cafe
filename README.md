@@ -125,7 +125,7 @@ Alfa Slab One (headings), Yellowtail (script accents), Inter (body). See
 
 - [x] **Phase 0: Repo + docs.** POC imported under `poc/`, this README.
 - [x] **Phase 1: Scaffold.** `server/`, `web/`, `Dockerfile`, `Makefile`, `/healthz`, `/metrics`.
-- [ ] **Phase 2: Storage.** SQLite schema + migrations, store packages with tests.
+- [x] **Phase 2: Storage.** SQLite schema + migrations, store packages with tests.
 - [ ] **Phase 3: Seed import.** Load the POC's 22 DJs, 28 hosts, partners, events and settings.
 - [ ] **Phase 4: Public pages.** Templates reproducing the current pages from the database; visual check against the POC.
 - [ ] **Phase 5: Admin API + uploads.** CRUD, image validation/resizing, tests.

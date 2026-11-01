@@ -10,10 +10,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/mlh5599/muddys-music-cafe/server/internal/api"
+	"github.com/mlh5599/muddys-music-cafe/server/internal/storage"
 )
 
 func main() {
@@ -27,7 +29,13 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	api.Register(mux, api.Deps{})
+	db, err := storage.Open(filepath.Join(*dataDir, "muddys.db"))
+	if err != nil {
+		log.Fatalf("open database: %v", err)
+	}
+	defer db.Close()
+
+	api.Register(mux, api.Deps{DB: db})
 
 	metricsMux := http.NewServeMux()
 	api.RegisterMetrics(metricsMux)

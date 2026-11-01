@@ -2,6 +2,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -12,7 +13,9 @@ import (
 
 // Deps holds the dependencies Register wires into route handlers. It grows as
 // storage and uploads land in later phases.
-type Deps struct{}
+type Deps struct {
+	DB *sql.DB
+}
 
 // Register attaches all public-facing routes to mux, each wrapped in the
 // standard middleware chain. It deliberately does NOT register /metrics:
