@@ -2,8 +2,8 @@
 # it, tag the commit, and deploy that exact image by digest. There is no other
 # branch and no release PR; tags only record what shipped.
 #
-# The signer identity checked by deploy/deploy.sh is this file on refs/heads/main,
-# so renaming it means updating that script.
+# The signer identity the host's registry entry accepts is this file on
+# refs/heads/main, so renaming it means updating that entry.
 name: Release
 on:
   push:
@@ -71,43 +71,31 @@ jobs:
       - uses: sigstore/cosign-installer@v4.1.2
       - name: Sign the image digest
         run: cosign sign --yes "$IMAGE@${{ steps.build.outputs.digest }}"
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: server/go.mod
-      - name: Build the deploy receiver
-        run: |
-          cd server
-          CGO_ENABLED=0 go build -trimpath -o ../dist/deployhook ./cmd/deployhook
-          cd ../dist && cp ../deploy/deploy.sh . && sha256sum deployhook deploy.sh > SHA256SUMS
       - name: Tag the commit and publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
         run: |
           gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes \
-            --notes "Image: \`$IMAGE@${{ steps.build.outputs.digest }}\`" \
-            dist/deployhook dist/deploy.sh dist/SHA256SUMS
+            --notes "Image: \`$IMAGE@${{ steps.build.outputs.digest }}\`"
 
   deploy:
     needs: build
-    # Off until the host side exists. Set the repository variable
+    # Off until the host's runner exists. Set the repository variable
     # DEPLOY_ENABLED=true to turn automatic deploys on.
     if: vars.DEPLOY_ENABLED == 'true'
-    runs-on: ubuntu-latest
+    # Only this job ever runs on the host's runner, and only after a merge to main.
+    runs-on: [self-hosted, linux, deploy]
     environment: production
     # Serialise deploys without cancelling a running one; a newer merge waits.
     concurrency:
       group: deploy
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v7
-        with:
-          sparse-checkout: .github/actions/deploy
-      - uses: ./.github/actions/deploy
-        with:
-          url: ${{ secrets.DEPLOY_URL }}
-          client-id: ${{ secrets.DEPLOY_ACCESS_CLIENT_ID }}
-          client-secret: ${{ secrets.DEPLOY_ACCESS_CLIENT_SECRET }}
-          hmac-secret: ${{ secrets.DEPLOY_HMAC_SECRET }}
-          tag: ${{ needs.build.outputs.tag }}
-          digest: ${{ needs.build.outputs.digest }}
+      # The runner may run exactly this one command, as the deploy user (see
+      # docs/deployment.md). It verifies the image signature against this
+      # repository's release workflow before doing anything.
+      - env:
+          TAG: ${{ needs.build.outputs.tag }}
+          DIGEST: ${{ needs.build.outputs.digest }}
+        run: sudo -n -u deploy /usr/local/lib/deploy-kit/deploy-app.sh muddys "$TAG" "$DIGEST"

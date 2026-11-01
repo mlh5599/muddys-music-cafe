@@ -24,8 +24,8 @@ jobs:
       - run: make test
       # Includes the migration fixtures: current code must open every frozen
       # release database in server/internal/storage/testdata.
-      - name: Deploy script tests
-        run: deploy/test-deploy.sh
+      - name: Rollback hook tests
+        run: deploy/test-rollback-db.sh
       - name: Shell scripts
         run: shellcheck deploy/*.sh scripts/*.sh
   docker:
