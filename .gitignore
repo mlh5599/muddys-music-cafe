@@ -3,3 +3,23 @@ node_modules/
 .wrangler/
 .dev.vars
 tools/wix-cache/
+
+# Secrets and local config — never commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+*.secret
+
+# Runtime data
+data/
+*.db
+*.db-shm
+*.db-wal
+uploads/
+
+# Build output
+bin/
+web/node_modules/
