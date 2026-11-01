@@ -91,3 +91,52 @@ func TestAdminAPILockedByDefault(t *testing.T) {
 		}
 	}
 }
+
+func TestHostSplit(t *testing.T) {
+	db, err := storage.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Close() })
+	mux := http.NewServeMux()
+	if err := Register(mux, Deps{
+		DB: db, UploadsDir: t.TempDir(), DevNoAuth: true,
+		PublicHost: "site.example.test", ExtraPublicHosts: []string{"www.site.example.test"},
+		AdminHost: "admin.example.test", SiteURL: "https://site.example.test",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	get := func(host, path string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest(http.MethodGet, path, nil)
+		r.Host = host
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, r)
+		return rec
+	}
+	cases := []struct {
+		host, path string
+		want       int
+	}{
+		{"site.example.test", "/", 200},
+		{"www.site.example.test", "/djs", 200},
+		{"SITE.example.test:443", "/", 200},
+		{"site.example.test", "/healthz", 200},
+		{"site.example.test", "/admin/", 404},
+		{"site.example.test", "/api/admin/events", 404},
+		{"admin.example.test", "/api/admin/events", 200},
+		{"admin.example.test", "/admin/", 200},
+		{"admin.example.test", "/", 302},
+		{"admin.example.test", "/djs", 404},
+		{"admin.example.test", "/healthz", 200},
+		{"evil.test", "/", 404},
+		{"evil.test", "/api/admin/events", 404},
+	}
+	for _, c := range cases {
+		if got := get(c.host, c.path).Code; got != c.want {
+			t.Errorf("%s%s = %d, want %d", c.host, c.path, got, c.want)
+		}
+	}
+	if body := get("site.example.test", "/").Body.String(); !strings.Contains(body, `content="https://site.example.test/static/images/logo.png"`) {
+		t.Error("og:image is not absolute")
+	}
+}

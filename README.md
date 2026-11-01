@@ -22,6 +22,7 @@ SteadySum):
 - **Packaging**: one Docker image (multi-stage `node` -> `go build CGO_ENABLED=0` -> `alpine`); the Go binary `go:embed`s the built admin and the public templates/assets
 - **Uploads**: photos and posters are validated, re-encoded and stored under the data directory (`<data-dir>/uploads`), served by the app
 - **Access**: no in-app login. `/admin` and the write API are expected to sit behind an access-gating layer (Cloudflare Access, VPN, reverse proxy auth). Public pages need no login.
+- **Hostnames**: with `-public-host` and `-admin-host` set, the admin app and API are served only on the admin hostname and the public site only on the public one (`-public-host-alias` adds e.g. `www`; `-site-url` makes link-preview image URLs absolute). Unset, everything is served on every hostname (local development).
 - **Config**: flags only: `-addr`, `-metrics-addr`, `-data-dir`, `-access-team-domain`, `-access-aud` (identifiers, not secrets; `-dev-no-auth` exists for local development and only works on a loopback address)
 
 The repo contains nothing specific to where it is hosted. Deployment lives

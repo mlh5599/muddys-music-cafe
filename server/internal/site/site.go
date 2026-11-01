@@ -31,6 +31,9 @@ var staticFS embed.FS
 type Config struct {
 	DB         *sql.DB
 	UploadsDir string
+	// SiteURL is the public origin (e.g. https://example.com), used to make
+	// link-preview image addresses absolute. Empty keeps them relative.
+	SiteURL string
 	// Now returns the current time; nil means time.Now. Tests override it.
 	Now func() time.Time
 }

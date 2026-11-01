@@ -15,6 +15,7 @@ type common struct {
 	Title, Description string
 	Active             string // "dj", "host" or ""
 	Version            string
+	SiteURL            string
 	Year               int
 
 	StreamURL, StatusURL, ClubSLurl, SLGroupURL string
@@ -68,7 +69,7 @@ func (s *Site) loadCommon(ctx context.Context, title, description string) (commo
 		}
 	}
 	c := common{
-		Title: title, Description: description, Version: s.version, Year: s.cfg.Now().In(loc).Year(),
+		Title: title, Description: description, Version: s.version, SiteURL: strings.TrimRight(s.cfg.SiteURL, "/"), Year: s.cfg.Now().In(loc).Year(),
 		StreamURL: set[storage.SettingRadioStreamURL], StatusURL: set[storage.SettingRadioStatusURL],
 		ClubSLurl: set[storage.SettingClubSLurl], SLGroupURL: set[storage.SettingSLGroupURL],
 		FacebookURL: set[storage.SettingFacebookURL], FlickrURL: set[storage.SettingFlickrURL],

@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -28,6 +29,10 @@ func main() {
 	accessTeam := flag.String("access-team-domain", "", "access gate team domain; with -access-aud, enables the admin API")
 	accessAud := flag.String("access-aud", "", "access gate application audience tag")
 	devNoAuth := flag.Bool("dev-no-auth", false, "DEVELOPMENT ONLY: skip admin sign-in checks (loopback addresses only)")
+	publicHost := flag.String("public-host", "", "public site hostname; with -admin-host, serves the public site only on it")
+	extraHosts := flag.String("public-host-alias", "", "comma-separated extra hostnames that serve the public site (e.g. www)")
+	adminHost := flag.String("admin-host", "", "admin hostname; the admin app and API are served only on it")
+	siteURL := flag.String("site-url", "", "public origin, e.g. https://example.com (makes link-preview image URLs absolute)")
 	seedFlag := flag.Bool("seed", false, "import the starter content into an empty database, then exit")
 	flag.Parse()
 
@@ -50,6 +55,9 @@ func main() {
 		return
 	}
 
+	if (*publicHost == "") != (*adminHost == "") {
+		log.Fatal("-public-host and -admin-host must be set together")
+	}
 	var verifier *admin.Verifier
 	switch {
 	case *devNoAuth:
@@ -69,6 +77,8 @@ func main() {
 	if err := api.Register(mux, api.Deps{
 		DB: db, UploadsDir: filepath.Join(*dataDir, "uploads"),
 		Verifier: verifier, DevNoAuth: *devNoAuth,
+		PublicHost: *publicHost, AdminHost: *adminHost, SiteURL: *siteURL,
+		ExtraPublicHosts: splitList(*extraHosts),
 	}); err != nil {
 		log.Fatalf("register routes: %v", err)
 	}
@@ -132,4 +142,14 @@ func isLoopback(addr string) bool {
 	}
 	ip := net.ParseIP(host)
 	return ip != nil && ip.IsLoopback()
+}
+
+func splitList(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
