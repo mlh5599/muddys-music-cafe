@@ -64,6 +64,9 @@ func Register(mux *http.ServeMux, d Deps) error {
 	adm.Handle("/api/admin/", adminAPI)
 	adm.Handle("/admin/", adminUI)
 	adm.Handle("GET /{$}", http.RedirectHandler("/admin/", http.StatusFound))
+	// The admin shows pictures, which are served from /uploads/; only that path
+	// is shared, the rest of the public site stays off the admin hostname.
+	adm.Handle("GET /uploads/", public)
 
 	hosts := []string{normalizeHost(d.PublicHost)}
 	for _, a := range d.ExtraPublicHosts {

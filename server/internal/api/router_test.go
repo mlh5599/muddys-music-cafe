@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -98,9 +99,13 @@ func TestHostSplit(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Close() })
+	uploads := t.TempDir()
+	if err := os.WriteFile(filepath.Join(uploads, "pic.jpg"), []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	mux := http.NewServeMux()
 	if err := Register(mux, Deps{
-		DB: db, UploadsDir: t.TempDir(), DevNoAuth: true,
+		DB: db, UploadsDir: uploads, DevNoAuth: true,
 		PublicHost: "site.example.test", ExtraPublicHosts: []string{"www.site.example.test"},
 		AdminHost: "admin.example.test", SiteURL: "https://site.example.test",
 	}); err != nil {
@@ -127,6 +132,8 @@ func TestHostSplit(t *testing.T) {
 		{"admin.example.test", "/admin/", 200},
 		{"admin.example.test", "/", 302},
 		{"admin.example.test", "/djs", 404},
+		{"admin.example.test", "/uploads/pic.jpg", 200}, // admin previews pictures
+		{"admin.example.test", "/static/images/logo.png", 404},
 		{"admin.example.test", "/healthz", 200},
 		{"evil.test", "/", 404},
 		{"evil.test", "/api/admin/events", 404},
