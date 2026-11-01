@@ -80,6 +80,11 @@ func Register(mux *http.ServeMux, d Deps) error {
 // metrics listener.
 func RegisterMetrics(mux *http.ServeMux) {
 	mux.Handle("GET /metrics", WithMiddleware(promhttp.Handler(), recoverMiddleware, loggingMiddleware))
+	// Container health probe. Served here, not on the public listener, because
+	// that one answers only its configured hostnames. The database is opened
+	// (and migrated) before either listener starts, so answering at all means
+	// startup finished. Unlogged: it is polled every few seconds.
+	mux.Handle("GET /healthz", WithMiddleware(http.HandlerFunc(healthz), recoverMiddleware))
 }
 
 func healthz(w http.ResponseWriter, _ *http.Request) {

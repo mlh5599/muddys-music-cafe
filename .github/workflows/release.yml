@@ -1,0 +1,113 @@
+# Every push to main is a release: test, build the image once, scan and sign
+# it, tag the commit, and deploy that exact image by digest. There is no other
+# branch and no release PR; tags only record what shipped.
+#
+# The signer identity checked by deploy/deploy.sh is this file on refs/heads/main,
+# so renaming it means updating that script.
+name: Release
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - ".github/ISSUE_TEMPLATE/**"
+permissions:
+  contents: read
+# One release at a time, and never cancel one that is part-way through.
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the tag and GitHub Release
+      packages: write   # push to GHCR
+      id-token: write   # keyless signing
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      digest: ${{ steps.build.outputs.digest }}
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # need existing tags to number today's release
+      - name: Work out the release tag (vYYYY.MM.DD.N)
+        id: tag
+        run: |
+          today=$(date -u +%Y.%m.%d)
+          n=$(git tag -l "v$today.*" | wc -l)
+          echo "tag=v$today.$((n + 1))" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+            ${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Scan the image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: sigstore/cosign-installer@v4
+      - name: Sign the image digest
+        run: cosign sign --yes "$IMAGE@${{ steps.build.outputs.digest }}"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: server/go.mod
+      - name: Build the deploy receiver
+        run: |
+          cd server
+          CGO_ENABLED=0 go build -trimpath -o ../dist/deployhook ./cmd/deployhook
+          cd ../dist && cp ../deploy/deploy.sh . && sha256sum deployhook deploy.sh > SHA256SUMS
+      - name: Tag the commit and publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes \
+            --notes "Image: \`$IMAGE@${{ steps.build.outputs.digest }}\`" \
+            dist/deployhook dist/deploy.sh dist/SHA256SUMS
+
+  deploy:
+    needs: build
+    # Off until the host side exists. Set the repository variable
+    # DEPLOY_ENABLED=true to turn automatic deploys on.
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    # Serialise deploys without cancelling a running one; a newer merge waits.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/actions/deploy
+      - uses: ./.github/actions/deploy
+        with:
+          url: ${{ secrets.DEPLOY_URL }}
+          client-id: ${{ secrets.DEPLOY_ACCESS_CLIENT_ID }}
+          client-secret: ${{ secrets.DEPLOY_ACCESS_CLIENT_SECRET }}
+          hmac-secret: ${{ secrets.DEPLOY_HMAC_SECRET }}
+          tag: ${{ needs.build.outputs.tag }}
+          digest: ${{ needs.build.outputs.digest }}

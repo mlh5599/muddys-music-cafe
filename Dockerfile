@@ -18,4 +18,7 @@ COPY --from=server-build /out/muddys /usr/local/bin/muddys
 USER muddys
 EXPOSE 8080
 EXPOSE 9090
+# Probe the internal listener: the public one answers only its configured hostnames.
+HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1:9090/healthz || exit 1
 ENTRYPOINT ["/usr/local/bin/muddys", "-addr=:8080", "-data-dir=/data"]

@@ -3,17 +3,18 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 permissions:
   contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: server/go.mod
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 23
           cache: npm
@@ -21,8 +22,16 @@ jobs:
       - run: cd web && npm ci
       - run: make lint
       - run: make test
+      # Includes the migration fixtures: current code must open every frozen
+      # release database in server/internal/storage/testdata.
+      - name: Deploy script tests
+        run: deploy/test-deploy.sh
+      - name: Shell scripts
+        run: shellcheck deploy/*.sh scripts/*.sh
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -t muddys-music-cafe:ci .
+      - name: Smoke test the built image
+        run: scripts/smoke-test.sh muddys-music-cafe:ci

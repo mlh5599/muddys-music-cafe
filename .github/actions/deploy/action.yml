@@ -1,0 +1,82 @@
+name: Deploy a release
+description: >
+  Ask the deploy receiver to deploy an image digest, then wait for the host to
+  report whether it came up healthy. The receiver address and credentials are
+  passed in by the caller (environment secrets); nothing host-specific is here.
+inputs:
+  url:
+    description: Base URL of the deploy receiver
+    required: true
+  client-id:
+    description: Access service token client id
+    required: true
+  client-secret:
+    description: Access service token client secret
+    required: true
+  hmac-secret:
+    description: Shared secret used to sign the request
+    required: true
+  tag:
+    description: Release tag, e.g. v2026.11.01.1
+    required: true
+  digest:
+    description: Image digest, sha256:...
+    required: true
+  timeout-minutes:
+    description: How long to wait for the deploy to finish
+    default: "15"
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        URL: ${{ inputs.url }}
+        CF_ID: ${{ inputs.client-id }}
+        CF_SECRET: ${{ inputs.client-secret }}
+        HMAC: ${{ inputs.hmac-secret }}
+        TAG: ${{ inputs.tag }}
+        DIGEST: ${{ inputs.digest }}
+        TIMEOUT: ${{ inputs.timeout-minutes }}
+      run: |
+        set -euo pipefail
+        URL=${URL%/}
+
+        sign() { # sign TIMESTAMP PAYLOAD -> hex HMAC-SHA256 of "TIMESTAMP\nPAYLOAD"
+          printf '%s\n%s' "$1" "$2" | openssl dgst -sha256 -hmac "$HMAC" -hex | sed 's/^.* //'
+        }
+        call() { # call METHOD PATH [BODY]
+          local ts payload=$2
+          ts=$(date +%s)
+          [ "$1" = POST ] && payload=$3
+          curl -sS --max-time 30 -X "$1" "$URL$2" \
+            -H "CF-Access-Client-Id: $CF_ID" -H "CF-Access-Client-Secret: $CF_SECRET" \
+            -H "X-Timestamp: $ts" -H "X-Signature: $(sign "$ts" "$payload")" \
+            -H 'Content-Type: application/json' ${3:+--data-binary "$3"} \
+            -w '\n%{http_code}'
+        }
+
+        body=$(jq -cn --arg tag "$TAG" --arg digest "$DIGEST" '{tag:$tag,digest:$digest}')
+        resp=$(call POST /deploy "$body")
+        code=${resp##*$'\n'}; json=${resp%$'\n'*}
+        if [ "$code" != 202 ]; then
+          echo "::error::deploy request was refused (HTTP $code): $json"
+          exit 1
+        fi
+        id=$(jq -r .id <<<"$json")
+        echo "deploy $id accepted for $TAG"
+
+        deadline=$(( $(date +%s) + TIMEOUT * 60 ))
+        while [ "$(date +%s)" -lt "$deadline" ]; do
+          sleep 5
+          resp=$(call GET "/deploy/$id") || true
+          code=${resp##*$'\n'}; json=${resp%$'\n'*}
+          [ "$code" = 200 ] || { echo "status check returned HTTP $code; retrying"; continue; }
+          state=$(jq -r .state <<<"$json")
+          [ "$state" = running ] && continue
+          echo "----- deploy log -----"; jq -r .log <<<"$json"; echo "----------------------"
+          if [ "$state" = succeeded ]; then echo "$TAG is live"; exit 0; fi
+          echo "::error::deploy of $TAG $state (the host rolled back if it could)"
+          exit 1
+        done
+        echo "::error::timed out waiting for the deploy to finish"
+        exit 1

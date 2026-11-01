@@ -218,3 +218,13 @@ func TestRadioRelaySurvivesWriteTimeout(t *testing.T) {
 		t.Errorf("got %d bytes in %v, want 20 bytes over ~1s", len(body), time.Since(start))
 	}
 }
+
+func TestInternalHealthz(t *testing.T) {
+	mux := http.NewServeMux()
+	RegisterMetrics(mux)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	if rec.Code != http.StatusOK || strings.TrimSpace(rec.Body.String()) != "ok" {
+		t.Fatalf("internal /healthz = %d %q", rec.Code, rec.Body)
+	}
+}

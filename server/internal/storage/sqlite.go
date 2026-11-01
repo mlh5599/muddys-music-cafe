@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -17,7 +18,9 @@ var ErrNotFound = errors.New("storage: not found")
 
 // Open opens (creating if necessary) the SQLite database at path, configures
 // it for WAL journaling, a busy timeout and foreign key enforcement, and
-// applies any pending migrations.
+// applies any pending migrations. Before migrating existing data it backs the
+// database up to a backups directory next to it, and it refuses to open a
+// database whose schema is newer than this build.
 //
 // path is passed through to SQLite's own URI-filename parsing
 // (https://sqlite.org/uri.html), which accepts plain relative and absolute
@@ -29,7 +32,7 @@ func Open(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("storage: open %s: %w", path, err)
 	}
 
-	if err := migrate(db); err != nil {
+	if err := migrate(db, filepath.Join(filepath.Dir(path), "backups")); err != nil {
 		db.Close()
 		return nil, err
 	}
