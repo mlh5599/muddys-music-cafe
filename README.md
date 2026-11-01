@@ -63,12 +63,11 @@ This repository is public. Rules for keeping it safe:
 server/
   cmd/server/            main
   internal/api/          JSON API for the admin (events, djs, hosts, partners, settings, uploads)
-  internal/site/         public page handlers + html/template rendering
+  internal/site/         public pages: html/template templates, static css/js/images, uploads serving
   internal/storage/      SQLite + numbered migrations
   internal/uploads/      image validation / resize / storage
   internal/webui/        embedded admin build
   internal/seed/         one-time import of the POC content
-site/                    public templates + static assets (css, js, images)
 web/                     admin SPA (Vite)
 poc/                     the original static proof of concept, kept for reference
 ```
@@ -127,7 +126,7 @@ Alfa Slab One (headings), Yellowtail (script accents), Inter (body). See
 - [x] **Phase 1: Scaffold.** `server/`, `web/`, `Dockerfile`, `Makefile`, `/healthz`, `/metrics`.
 - [x] **Phase 2: Storage.** SQLite schema + migrations, store packages with tests.
 - [x] **Phase 3: Seed import.** `server -seed` loads the POC's 22 DJs, 28 hosts, 84 partners, events and settings into an empty database (refuses if content exists).
-- [ ] **Phase 4: Public pages.** Templates reproducing the current pages from the database; visual check against the POC.
+- [x] **Phase 4: Public pages.** `/`, `/djs`, `/hosts` rendered from the database; static assets and uploads served with caching; visual check against the POC done.
 - [ ] **Phase 5: Admin API + uploads.** CRUD, image validation/resizing, tests.
 - [ ] **Phase 6: Admin UI.** Events, DJs, hosts, partners, settings.
 - [ ] **Phase 7: Containerize.** Verify the image builds and runs with a mounted data dir.

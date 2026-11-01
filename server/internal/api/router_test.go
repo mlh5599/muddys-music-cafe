@@ -3,19 +3,30 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/mlh5599/muddys-music-cafe/server/internal/storage"
 )
 
-func newTestMux() *http.ServeMux {
+func newTestMux(t *testing.T) *http.ServeMux {
+	t.Helper()
+	db, err := storage.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { db.Close() })
 	mux := http.NewServeMux()
-	Register(mux, Deps{})
+	if err := Register(mux, Deps{DB: db, UploadsDir: t.TempDir()}); err != nil {
+		t.Fatal(err)
+	}
 	return mux
 }
 
 func TestHealthz(t *testing.T) {
 	rec := httptest.NewRecorder()
-	newTestMux().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	newTestMux(t).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200", rec.Code)
 	}
@@ -26,7 +37,7 @@ func TestHealthz(t *testing.T) {
 
 func TestSecurityHeaders(t *testing.T) {
 	rec := httptest.NewRecorder()
-	newTestMux().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	newTestMux(t).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/healthz", nil))
 	for _, h := range []string{"Content-Security-Policy", "X-Content-Type-Options", "X-Frame-Options", "Referrer-Policy"} {
 		if rec.Header().Get(h) == "" {
 			t.Errorf("missing header %s", h)
@@ -39,7 +50,7 @@ func TestSecurityHeaders(t *testing.T) {
 
 func TestMetricsNotOnPublicMux(t *testing.T) {
 	rec := httptest.NewRecorder()
-	newTestMux().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	newTestMux(t).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
 	if body := rec.Body.String(); strings.Contains(body, "http_requests_total") {
 		t.Fatal("/metrics output is exposed on the public mux")
 	}
@@ -47,7 +58,7 @@ func TestMetricsNotOnPublicMux(t *testing.T) {
 
 func TestMetricsOnInternalMux(t *testing.T) {
 	// Generate at least one observation first.
-	newTestMux().ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	newTestMux(t).ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/healthz", nil))
 
 	mux := http.NewServeMux()
 	RegisterMetrics(mux)

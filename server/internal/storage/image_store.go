@@ -80,3 +80,27 @@ func requireAffected(res sql.Result, what string) error {
 	}
 	return nil
 }
+
+// List returns every image, keyed by id.
+func (s *ImageStore) List(ctx context.Context) (map[int64]Image, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT id, filename, content_type, size_bytes, width, height, created_at FROM images`)
+	if err != nil {
+		return nil, fmt.Errorf("storage: list images: %w", err)
+	}
+	defer rows.Close()
+
+	out := make(map[int64]Image)
+	for rows.Next() {
+		var img Image
+		var created string
+		if err := rows.Scan(&img.ID, &img.Filename, &img.ContentType, &img.SizeBytes, &img.Width, &img.Height, &created); err != nil {
+			return nil, fmt.Errorf("storage: scan image: %w", err)
+		}
+		if img.CreatedAt, err = parseTime(created); err != nil {
+			return nil, fmt.Errorf("storage: parse image created_at: %w", err)
+		}
+		out[img.ID] = img
+	}
+	return out, rows.Err()
+}

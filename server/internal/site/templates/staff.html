@@ -1,0 +1,88 @@
+{{template "head" .}}
+<section class="page-hero">
+  <div class="page-hero__bg" aria-hidden="true"></div>
+  <div class="container page-hero__inner">
+    {{if eq .Kind "dj"}}
+    <p class="eyebrow"><span class="neon-dot"></span> Behind the decks · 24/7</p>
+    <h1 class="page-hero__title">Our sensational <span class="script">DJs</span></h1>
+    <p class="page-hero__lede">Every set at Muddy's is played live by one of our <strong>{{len .Staff}}</strong> hand-picked DJs, from 70s classics to today's hits. Tap anyone to read their story.</p>
+    {{else}}
+    <p class="eyebrow"><span class="neon-dot"></span> On the floor · 24/7</p>
+    <h1 class="page-hero__title">Meet our <span class="script">hosts</span></h1>
+    <p class="page-hero__lede">At Muddy's you can always expect a warm welcome from one of our <strong>{{len .Staff}}</strong> wonderful hosts. Tap anyone to read their story.</p>
+    {{end}}
+    <div class="staff-tools">
+      <div class="seg" role="navigation" aria-label="Staff pages">
+        <a href="/djs"{{if eq .Kind "dj"}} class="is-active" aria-current="page"{{end}}>DJs</a>
+        <a href="/hosts"{{if eq .Kind "host"}} class="is-active" aria-current="page"{{end}}>Hosts</a>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+        <span class="sr-only">Search {{.RolePlural}}</span>
+        <input type="search" class="js-staff-search" placeholder="Find a {{.Role}}…" autocomplete="off">
+      </label>
+    </div>
+  </div>
+</section>
+
+<section class="staff-section">
+  <div class="container">
+    <ul class="staff-grid js-staff-grid">
+      {{range .Staff}}
+      <li class="staff-card" id="{{.Anchor}}" data-name="{{.SearchName}}">
+        <button type="button" class="staff-card__btn" aria-label="Read {{.Name}}'s bio">
+          <span class="staff-card__img"><img src="{{.PhotoURL}}" alt="" loading="lazy" width="600" height="600"></span>
+          <span class="staff-card__body">
+            {{if .Pre}}<span class="staff-card__pre">{{.Pre}}</span>{{end}}
+            <span class="staff-card__name">{{.ShortName}}</span>
+            <span class="staff-card__teaser">{{.Teaser}}</span>
+            <span class="staff-card__more">Read bio <b>→</b></span>
+          </span>
+        </button>
+        <div class="profile-data" hidden>
+          <p class="eyebrow">{{$.Role}} at Muddy's</p>
+          <h2 class="profile__name">{{if .Pre}}<span>{{.Pre}}</span> {{end}}{{.ShortName}}</h2>
+          <div class="profile__bio">
+            {{range .Bio}}<p>{{.}}</p>{{else}}<p class="muted">{{.ShortName}}'s bio is coming soon. Say hi next time you see them at Muddy's!</p>{{end}}
+          </div>
+          {{if .Schedule}}<h3 class="profile__sub">Catch {{.ShortName}} hosting</h3>
+          <ul class="profile__sched">{{range .Schedule}}<li>{{.}} <small>SLT</small></li>{{end}}</ul>{{end}}
+          {{if .SLName}}<p class="profile__sl"><span>Second Life name</span> {{.SLName}}</p>{{end}}
+        </div>
+      </li>
+      {{end}}
+    </ul>
+    <p class="staff-empty js-staff-empty" hidden>No {{.RolePlural}} match that name.</p>
+  </div>
+</section>
+
+<section class="staff-cta">
+  <div class="container staff-cta__inner">
+    <div>
+      <p class="eyebrow">Now hiring</p>
+      {{if eq .Kind "dj"}}
+      <h2 class="h2">Want to spin at <span class="script">Muddy's?</span></h2>
+      <p>We're looking for experienced DJs who can keep a busy 24/7 PG club moving. You keep all the tips.</p>
+      {{else}}
+      <h2 class="h2">Want to host at <span class="script">Muddy's?</span></h2>
+      <p>We're looking for experienced, friendly hosts who can keep a busy 24/7 PG club welcoming. You keep all the tips.</p>
+      {{end}}
+    </div>
+    <a class="btn btn--primary" href="/#team">See what we're looking for</a>
+  </div>
+</section>
+
+<dialog class="profile" id="profile" aria-label="Profile">
+  <button class="profile__close" type="button" aria-label="Close">×</button>
+  <div class="profile__photo"></div>
+  <div class="profile__text"></div>
+  <div class="profile__nav">
+    <button class="profile__prev" type="button" aria-label="Previous">←</button>
+    <button class="profile__next" type="button" aria-label="Next">→</button>
+  </div>
+</dialog>
+{{template "foot" .}}
+<script src="/static/staff.js?v={{.Version}}"></script>
+<script src="/static/script.js?v={{.Version}}"></script>
+</body>
+</html>

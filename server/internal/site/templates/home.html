@@ -1,0 +1,229 @@
+{{template "head" .}}
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow"><span class="neon-dot"></span> Live in Second Life · 24 / 7 / 365</p>
+      <h1 class="hero__title">
+        The little club with a <span class="neon-blue">big&nbsp;heart.</span>
+      </h1>
+      <p class="hero__lede">
+        Since 2010, Muddy's Music Cafe has been Second Life's home for hand-picked DJs, friendly hosts,
+        and the best in soft rock to pop — <em>70s to today</em>. The music never stops.
+      </p>
+      <div class="hero__cta">
+        <button class="btn btn--primary js-play" type="button">
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          <span class="js-play-label">Listen Live</span>
+        </button>
+        {{if .ClubSLurl}}<a class="btn btn--primary" href="{{.ClubSLurl}}" target="_blank" rel="noopener">Teleport to Muddy's</a>{{end}}
+        {{if .SLGroupURL}}<a class="btn btn--ghost" href="{{.SLGroupURL}}" target="_blank" rel="noopener">Join our SL Group</a>{{end}}
+      </div>
+    </div>
+    <div class="hero__logo">
+      <div class="logo-glow" aria-hidden="true"></div>
+      <img src="/static/images/logo.png" alt="Muddy's — Est. 2010" width="520" height="520">
+    </div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>Live DJs 24/7</span><i>★</i><span>Soft Rock to Pop</span><i>★</i><span>70s to Today</span><i>★</i><span>Est. 2010</span><i>★</i><span>All Hits All the Time</span><i>★</i><span>Award-Winning</span><i>★</i>
+    <span>Live DJs 24/7</span><i>★</i><span>Soft Rock to Pop</span><i>★</i><span>70s to Today</span><i>★</i><span>Est. 2010</span><i>★</i><span>All Hits All the Time</span><i>★</i><span>Award-Winning</span><i>★</i>
+  </div>
+</div>
+
+<section class="section" id="radio">
+  <div class="container radio">
+    <div class="radio__player">
+      <div class="player">
+        <div class="player__top">
+          <span class="badge badge--live"><span class="neon-dot"></span> Live</span>
+          <span class="player__station">Muddy's Radio</span>
+        </div>
+        <div class="player__art">
+          <img src="/static/images/logo.png" alt="" width="220" height="220">
+          <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p class="player__now js-status">Press play to tune in</p>
+        <div class="player__controls">
+          <button class="player__btn js-play" type="button" aria-label="Play Muddy's Radio">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </button>
+          <label class="vol">
+            <span class="sr-only">Volume</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4zm12.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+            <input type="range" min="0" max="1" step="0.01" value="0.8" class="js-volume">
+          </label>
+        </div>
+        {{if .StatusURL}}<a class="player__ext" href="{{.StatusURL}}" target="_blank" rel="noopener">Open stream in a new tab ↗</a>{{end}}
+      </div>
+    </div>
+    <div class="radio__copy">
+      <p class="eyebrow">Since 2015</p>
+      <h2 class="h2">Take the club <span class="script">home with you</span></h2>
+      <p>
+        Muddy's Radio started as a way for regulars to hear the sounds of the club while building or relaxing
+        in their own homes. Streaming 24 hours a day, 7 days a week, 365 days a year, it's now popular in its own right.
+      </p>
+      <div class="hud">
+        <img src="/static/images/club.png" alt="Two avatars dancing beside the Muddy's Smart HUD at the club" width="300" height="300" loading="lazy">
+        <div>
+          <h3 class="h3">Listen Anywhere HUD</h3>
+          <p>Grab the free Muddy's Smart HUD at the club and take the radio with you anywhere in Second Life. <small>(Media must be enabled.)</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" id="events">
+  <div class="container">
+    <header class="section__head">
+      <p class="eyebrow">What's on</p>
+      <h2 class="h2">Events at <span class="script">Muddy's</span></h2>
+      <p class="section__sub">Parties, contests, roadshows and more. Tap a poster for the full view.</p>
+    </header>
+    {{if .Events}}
+    <div class="events">
+      {{range .Events}}
+      <article class="event{{if .Featured}} event--feature{{end}}">
+        {{if .PosterURL}}<button class="event__img js-lightbox" type="button" data-src="{{.PosterURL}}" data-alt="{{.Title}} poster">
+          <img src="{{.PosterURL}}" alt="{{.Title}} poster" loading="lazy" width="{{.PosterW}}" height="{{.PosterH}}">
+        </button>{{end}}
+        <div class="event__body">
+          {{if .Badge}}<span class="badge badge--{{.BadgeStyle}}">{{.Badge}}</span>{{end}}
+          <h3 class="h3">{{.Title}}</h3>
+          {{if .Summary}}<p>{{.Summary}}</p>{{end}}
+          {{if .LinkURL}}<a class="link" href="{{.LinkURL}}" target="_blank" rel="noopener">{{.LinkLabel}} →</a>{{end}}
+          {{if .Link2URL}}<a class="link" href="{{.Link2URL}}" target="_blank" rel="noopener">{{.Link2Label}} →</a>{{end}}
+        </div>
+      </article>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="section__sub">No events are scheduled right now. Check back soon, or join our SL group to hear about the next one.</p>
+    {{end}}
+  </div>
+</section>
+
+{{with .Road}}
+<section class="section road">
+  <div class="container road__inner">
+    <div class="road__copy">
+      <p class="eyebrow">Muddy's on the road</p>
+      <h2 class="h2">We bring the <span class="script">party to you</span></h2>
+      <p>{{.Summary}}</p>
+      <div class="btn-row">
+        {{if .LinkURL}}<a class="btn btn--primary" href="{{.LinkURL}}" target="_blank" rel="noopener">{{.LinkLabel}}</a>{{end}}
+        {{if .Link2URL}}<a class="btn btn--ghost" href="{{.Link2URL}}" target="_blank" rel="noopener">{{.Link2Label}}</a>{{end}}
+      </div>
+    </div>
+    {{if .PosterURL}}<button class="road__poster js-lightbox" type="button" data-src="{{.PosterURL}}" data-alt="{{.Title}} poster">
+      <img src="{{.PosterURL}}" alt="{{.Title}} poster" loading="lazy" width="{{.PosterW}}" height="{{.PosterH}}">
+    </button>{{end}}
+  </div>
+</section>
+{{end}}
+
+<section class="section section--alt" id="story">
+  <div class="container">
+    <div class="story">
+      <div class="story__media">
+        <img src="/static/images/owner-beth.jpg" alt="Owner Bridget Hammill beside the glowing Muddy's sign" loading="lazy" width="900" height="450">
+      </div>
+      <div class="story__copy">
+        <p class="eyebrow">Our story</p>
+        <h2 class="h2">From humble beginnings to <span class="script">award-winning</span></h2>
+        <p>Founded in 2010, Muddy's has grown into one of the most popular and loved music venues in Second Life. Under the careful stewardship of owner <strong>Bridget Hammill</strong>, the club has gone from strength to strength, winning every major award along the way.</p>
+        <p>The friendly atmosphere, our hand-picked DJs and hosts, and a quietly efficient staff keep the music going around the clock. Here's to the next ten years and beyond.</p>
+        <p class="signoff">From Muddy and me, thank you. <span class="script">— Beth</span></p>
+      </div>
+    </div>
+
+    <dl class="stats">
+      <div><dt>Since</dt><dd>2010</dd></div>
+      <div><dt>Live DJs</dt><dd>24/7</dd></div>
+      <div><dt>Days a year</dt><dd>365</dd></div>
+      <div><dt>Partners</dt><dd>100+</dd></div>
+    </dl>
+
+    <div class="muddy">
+      <img src="/static/images/home-photo.jpg" alt="Muddy the chocolate labrador sitting in front of his doghouse" loading="lazy" width="600" height="744">
+      <div>
+        <p class="eyebrow">Meet the boss</p>
+        <h3 class="h2">This is <span class="script">Muddy.</span></h3>
+        <p>The club's namesake and resident good boy. You'll usually find him by his doghouse, keeping an eye on the dance floor. Give him a pat when you visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="giving">
+  <div class="container giving">
+    <div class="giving__copy">
+      <p class="eyebrow">Giving back</p>
+      <h2 class="h2">Always keen to support <span class="script">SL charities</span></h2>
+      <p>Muddy's is proud to be the <strong>official radio station of the American Cancer Society of Second Life</strong>, supporting Relay For Life and Strides. Together we celebrate survivors, remember loved ones, and keep fighting for a cure.</p>
+    </div>
+    <div class="giving__media">
+      <button class="js-lightbox" type="button" data-src="/static/images/acs.jpg" data-alt="Muddy's Music Cafe is the official radio station for the American Cancer Society of SL">
+        <img src="/static/images/acs.jpg" alt="Official radio station for the American Cancer Society of SL poster" loading="lazy" width="900" height="900">
+      </button>
+      <button class="js-lightbox" type="button" data-src="/static/images/charities.jpg" data-alt="Muddy's charity support">
+        <img src="/static/images/charities.jpg" alt="Muddy's charity support board" loading="lazy" width="699" height="843">
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" id="team">
+  <div class="container team">
+    <div class="team__card">
+      <p class="eyebrow">Now hiring</p>
+      <h2 class="h2">DJs &amp; Hosts <span class="script">wanted</span></h2>
+      <p class="big">You keep all the tips.</p>
+      {{if .Hiring}}<ul class="checks">
+        {{range .Hiring}}<li>{{.}}</li>{{end}}
+      </ul>{{end}}
+      <p>Contact <strong>Bridget Hammill</strong> in Second Life for more information.</p>
+    </div>
+    <div class="team__copy">
+      <h3 class="h3">The people behind the music</h3>
+      <p>Every DJ and host at Muddy's is hand-picked. They're the reason regulars keep coming back, and the reason first-timers become regulars.</p>
+      <div class="team__links">
+        <a class="tile" href="/djs"><span>Our {{.DJCount}} DJs</span><b>→</b></a>
+        <a class="tile" href="/hosts"><span>Our {{.HostCount}} Hosts</span><b>→</b></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="partners">
+  <div class="container">
+    <header class="section__head">
+      <p class="eyebrow">Business partners</p>
+      <h2 class="h2">Grow with <span class="script">Muddy's Radio</span></h2>
+      <p class="section__sub">Our radio is going grid-wide. Partners get free or discounted advertising, chosen because they're excellent at what they do and have the track record to prove it.</p>
+    </header>
+    <div class="partners" aria-label="Some of our business partners">
+      {{range .Partners}}<span>{{.}}</span>{{end}}
+    </div>
+    <div class="partners__cta">
+      <p>Want to reach Muddy's listeners without costing you a penny?</p>
+      {{if .SLGroupURL}}<a class="btn btn--primary" href="{{.SLGroupURL}}" target="_blank" rel="noopener">Contact Bridget Hammill in SL</a>{{end}}
+    </div>
+  </div>
+</section>
+
+<dialog class="lightbox" id="lightbox">
+  <button class="lightbox__close" type="button" aria-label="Close">×</button>
+  <img src="" alt="">
+</dialog>
+{{template "foot" .}}
+<script src="/static/script.js?v={{.Version}}"></script>
+</body>
+</html>

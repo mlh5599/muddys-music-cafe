@@ -45,7 +45,9 @@ func main() {
 		return
 	}
 
-	api.Register(mux, api.Deps{DB: db})
+	if err := api.Register(mux, api.Deps{DB: db, UploadsDir: filepath.Join(*dataDir, "uploads")}); err != nil {
+		log.Fatalf("register routes: %v", err)
+	}
 
 	metricsMux := http.NewServeMux()
 	api.RegisterMetrics(metricsMux)
