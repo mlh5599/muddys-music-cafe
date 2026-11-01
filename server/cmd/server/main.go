@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/mlh5599/muddys-music-cafe/server/internal/api"
+	"github.com/mlh5599/muddys-music-cafe/server/internal/seed"
 	"github.com/mlh5599/muddys-music-cafe/server/internal/storage"
 )
 
@@ -22,6 +23,7 @@ func main() {
 	addr := flag.String("addr", ":8080", "listen address")
 	metricsAddr := flag.String("metrics-addr", ":9090", "internal-only listen address for /metrics")
 	dataDir := flag.String("data-dir", "./data", "directory for persistent data (SQLite database, uploads)")
+	seedFlag := flag.Bool("seed", false, "import the starter content into an empty database, then exit")
 	flag.Parse()
 
 	if err := os.MkdirAll(*dataDir, 0o750); err != nil {
@@ -34,6 +36,14 @@ func main() {
 		log.Fatalf("open database: %v", err)
 	}
 	defer db.Close()
+
+	if *seedFlag {
+		if err := seed.Run(context.Background(), db, filepath.Join(*dataDir, "uploads")); err != nil {
+			log.Fatalf("seed: %v", err)
+		}
+		log.Print("seed: starter content imported")
+		return
+	}
 
 	api.Register(mux, api.Deps{DB: db})
 
