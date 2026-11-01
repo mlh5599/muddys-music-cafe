@@ -2,6 +2,7 @@ package site
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -211,14 +212,22 @@ func TestRadioRelay(t *testing.T) {
 	if err := s.settings.SetMany(context.Background(), map[string]string{storage.SettingRadioStreamURL: up.URL + "/stream"}); err != nil {
 		t.Fatal(err)
 	}
-	rec := get(s, "/radio/stream?t=123")
-	if rec.Code != 200 || rec.Body.String() != "ID3-fake-audio-bytes" {
-		t.Fatalf("relay = %d %q", rec.Code, rec.Body)
+	// A real server: lifting the write deadline needs a real connection.
+	front := httptest.NewServer(s)
+	defer front.Close()
+	resp, err := http.Get(front.URL + "/radio/stream?t=123")
+	if err != nil {
+		t.Fatal(err)
 	}
-	if rec.Header().Get("Content-Type") != "audio/mpeg" || rec.Header().Get("Cache-Control") != "no-store" {
-		t.Errorf("headers: %v", rec.Header())
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 || string(body) != "ID3-fake-audio-bytes" {
+		t.Fatalf("relay = %d %q", resp.StatusCode, body)
 	}
-	if rec.Header().Get("icy-name") != "" {
+	if resp.Header.Get("Content-Type") != "audio/mpeg" || resp.Header.Get("Cache-Control") != "no-store" {
+		t.Errorf("headers: %v", resp.Header)
+	}
+	if resp.Header.Get("icy-name") != "" {
 		t.Error("upstream headers leaked")
 	}
 }

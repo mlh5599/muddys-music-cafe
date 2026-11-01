@@ -1,12 +1,15 @@
 package api
 
 import (
+	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/mlh5599/muddys-music-cafe/server/internal/storage"
 )
@@ -145,5 +148,73 @@ func TestHostSplit(t *testing.T) {
 	}
 	if body := get("site.example.test", "/").Body.String(); !strings.Contains(body, `content="https://site.example.test/static/images/logo.png"`) {
 		t.Error("og:image is not absolute")
+	}
+}
+
+// deadlineWriter is a ResponseWriter that supports SetWriteDeadline, like the
+// real server's.
+type deadlineWriter struct {
+	*httptest.ResponseRecorder
+	set bool
+}
+
+func (d *deadlineWriter) SetWriteDeadline(time.Time) error { d.set = true; return nil }
+
+func TestStatusRecorderUnwrap(t *testing.T) {
+	dw := &deadlineWriter{ResponseRecorder: httptest.NewRecorder()}
+	rc := http.NewResponseController(&statusRecorder{ResponseWriter: dw})
+	if err := rc.SetWriteDeadline(time.Time{}); err != nil || !dw.set {
+		t.Fatalf("SetWriteDeadline through statusRecorder: err=%v reached=%v", err, dw.set)
+	}
+	if err := rc.Flush(); err != nil {
+		t.Fatalf("Flush through statusRecorder: %v", err)
+	}
+}
+
+// The whole handler chain must let the radio relay outlive the server's
+// WriteTimeout; this regressed when statusRecorder lacked Unwrap.
+func TestRadioRelaySurvivesWriteTimeout(t *testing.T) {
+	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "audio/mpeg")
+		for i := 0; i < 20; i++ {
+			if _, err := w.Write([]byte("x")); err != nil {
+				return
+			}
+			w.(http.Flusher).Flush()
+			time.Sleep(50 * time.Millisecond)
+		}
+	}))
+	defer up.Close()
+
+	db, err := storage.Open(filepath.Join(t.TempDir(), "t.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	if err := storage.NewSettingsStore(db).SetMany(context.Background(),
+		map[string]string{storage.SettingRadioStreamURL: up.URL}); err != nil {
+		t.Fatal(err)
+	}
+	mux := http.NewServeMux()
+	if err := Register(mux, Deps{DB: db, UploadsDir: t.TempDir()}); err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewUnstartedServer(mux)
+	srv.Config.WriteTimeout = 200 * time.Millisecond
+	srv.Start()
+	defer srv.Close()
+
+	start := time.Now()
+	resp, err := http.Get(srv.URL + "/radio/stream")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("stream was cut after %d bytes (%v): %v", len(body), time.Since(start), err)
+	}
+	if len(body) != 20 || time.Since(start) < 900*time.Millisecond {
+		t.Errorf("got %d bytes in %v, want 20 bytes over ~1s", len(body), time.Since(start))
 	}
 }

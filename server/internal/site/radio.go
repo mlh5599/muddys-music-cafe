@@ -1,7 +1,6 @@
 package site
 
 import (
-	"context"
 	"io"
 	"log"
 	"net/http"
@@ -62,6 +61,15 @@ func (s *Site) serveRadio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// A relay that the server's write timeout will kill after a minute is worse
+	// than a clear failure, so refuse to start if the deadline can't be lifted.
+	rc := http.NewResponseController(w)
+	if err := rc.SetWriteDeadline(time.Time{}); err != nil {
+		log.Printf("radio relay: cannot lift write deadline: %v", err)
+		http.Error(w, "the radio is unavailable", http.StatusInternalServerError)
+		return
+	}
+
 	ct := resp.Header.Get("Content-Type")
 	if ct == "" {
 		ct = "audio/mpeg"
@@ -71,9 +79,11 @@ func (s *Site) serveRadio(w http.ResponseWriter, r *http.Request) {
 	h.Set("Cache-Control", "no-store")
 	h.Set("X-Accel-Buffering", "no") // don't let a proxy buffer a live stream
 	w.WriteHeader(http.StatusOK)
+	if err := rc.Flush(); err != nil {
+		log.Printf("radio relay: cannot flush: %v", err)
+		return
+	}
 
-	rc := http.NewResponseController(w)
-	_ = rc.SetWriteDeadline(time.Time{}) // the server's write timeout would cut a live stream
 	buf := make([]byte, 16<<10)
 	for {
 		n, rerr := resp.Body.Read(buf)
@@ -81,10 +91,13 @@ func (s *Site) serveRadio(w http.ResponseWriter, r *http.Request) {
 			if _, werr := w.Write(buf[:n]); werr != nil {
 				return
 			}
-			_ = rc.Flush()
+			if err := rc.Flush(); err != nil {
+				log.Printf("radio relay: cannot flush: %v", err)
+				return
+			}
 		}
 		if rerr != nil {
-			if rerr != io.EOF && r.Context().Err() == nil && rerr != context.Canceled {
+			if rerr != io.EOF && r.Context().Err() == nil {
 				log.Printf("radio relay: read: %v", rerr)
 			}
 			return

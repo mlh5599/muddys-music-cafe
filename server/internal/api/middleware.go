@@ -94,6 +94,10 @@ func (rec *statusRecorder) WriteHeader(status int) {
 	rec.ResponseWriter.WriteHeader(status)
 }
 
+// Unwrap lets http.ResponseController reach the underlying writer
+// (SetWriteDeadline, Flush, Hijack).
+func (rec *statusRecorder) Unwrap() http.ResponseWriter { return rec.ResponseWriter }
+
 // metricsMiddleware records request counts and latency by route pattern
 // (r.Pattern, set by ServeMux: low cardinality, unlike raw URL paths).
 func metricsMiddleware(next http.Handler) http.Handler {
