@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our DJs · Muddy's Music Cafe</title>
+  <meta name="description" content="Meet the hand-picked DJs of Muddy's Music Cafe, spinning live in Second Life 24/7 since 2010.">
+  <link rel="icon" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Yellowtail&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-staff="djs">
+
+<header class="nav" id="top">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__brand" aria-label="Muddy's home">
+      <img src="images/logo.png" alt="" width="44" height="44">
+      <span>Muddy's</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Main">
+      <a href="index.html#radio">Radio</a>
+      <a href="index.html#events">Events</a>
+      <a href="index.html#story">Our Story</a>
+      <a href="djs.html" aria-current="page">DJs</a>
+      <a href="hosts.html">Hosts</a>
+      <a href="index.html#partners">Partners</a>
+    </nav>
+    <button class="onair js-play" type="button" aria-label="Play Muddy's Radio">
+      <span class="onair__dot"></span><span class="onair__label">On Air</span>
+    </button>
+    <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="page-hero__bg" aria-hidden="true"></div>
+    <div class="container page-hero__inner">
+      <p class="eyebrow"><span class="neon-dot"></span> Behind the decks · 24/7</p>
+      <h1 class="page-hero__title">Our sensational <span class="script">DJs</span></h1>
+      <p class="page-hero__lede">Every set at Muddy's is played live by one of our <strong class="js-staff-count">22</strong> hand-picked DJs, from 70s classics to today's hits. Tap anyone to read their story.</p>
+      <div class="staff-tools">
+        <div class="seg" role="navigation" aria-label="Staff pages">
+          <a href="djs.html" class="is-active" aria-current="page">DJs</a>
+          <a href="hosts.html">Hosts</a>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+          <span class="sr-only">Search DJs</span>
+          <input type="search" class="js-staff-search" placeholder="Find a DJ…" autocomplete="off">
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="staff-section">
+    <div class="container">
+      <ul class="staff-grid js-staff-grid"></ul>
+      <p class="staff-empty js-staff-empty" hidden>No DJs match that name.</p>
+    </div>
+  </section>
+
+  <section class="staff-cta">
+    <div class="container staff-cta__inner">
+      <div>
+        <p class="eyebrow">Now hiring</p>
+        <h2 class="h2">Want to spin at <span class="script">Muddy's?</span></h2>
+        <p>We're looking for experienced DJs who can keep a busy 24/7 PG club moving. You keep all the tips.</p>
+      </div>
+      <a class="btn btn--primary" href="index.html#team">See what we're looking for</a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <img src="images/logo.png" alt="Muddy's — Est. 2010" width="120" height="120">
+      <p>A little club in Second Life<br>with a big heart.</p>
+    </div>
+    <div class="footer__social">
+      <a href="https://www.facebook.com/Muddysmusiccafe" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.7-4.5 4.5V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.7c0-.5.3-.7.5-.7z"/></svg>
+        Facebook
+      </a>
+      <a href="http://world.secondlife.com/group/6ffdf9ce-7581-3731-e601-81ee5f9b6842" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4zm8 0h-1c1.2.9 2 2 2 4v3h7v-3c0-2.7-5.3-4-8-4z"/></svg>
+        SL Group
+      </a>
+      <a href="https://www.flickr.com/groups/muddys/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/></svg>
+        Flickr
+      </a>
+      <a href="https://www.youtube.com/watch?v=D2rIlQpxip8" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8zM9.7 15V9l5.8 3-5.8 3z"/></svg>
+        YouTube
+      </a>
+    </div>
+    <p class="footer__copy">© <span class="js-year">2026</span> Muddy's Music Cafe · Est. 2010 · Second Life</p>
+  </div>
+</footer>
+
+<dialog class="profile" id="profile" aria-label="Profile">
+  <button class="profile__close" type="button" aria-label="Close">×</button>
+  <div class="profile__photo"></div>
+  <div class="profile__text"></div>
+  <div class="profile__nav">
+    <button class="profile__prev" type="button" aria-label="Previous">←</button>
+    <button class="profile__next" type="button" aria-label="Next">→</button>
+  </div>
+</dialog>
+
+<script src="staff-data.js"></script>
+<script src="staff.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

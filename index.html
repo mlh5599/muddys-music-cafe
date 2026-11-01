@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muddy's Music Cafe</title>
+<meta name="description" content="Muddy's Music Cafe — Second Life's award-winning music venue since 2010. Live DJs 24/7, 365 days a year, plus Muddy's Radio streaming across the grid.">
+  <meta property="og:title" content="Muddy's Music Cafe">
+  <meta property="og:description" content="Live DJs 24/7 in Second Life since 2010. Soft rock to pop, 70s to today.">
+  <meta property="og:image" content="images/logo.png">
+  <link rel="icon" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Yellowtail&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- ============ NAV ============ -->
+<header class="nav" id="top">
+  <div class="nav__inner">
+    <a href="#top" class="nav__brand" aria-label="Muddy's home">
+      <img src="images/logo.png" alt="" width="44" height="44">
+      <span>Muddy's</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Main">
+      <a href="#radio">Radio</a>
+      <a href="#events">Events</a>
+      <a href="#story">Our Story</a>
+      <a href="djs.html">DJs</a>
+      <a href="hosts.html">Hosts</a>
+      <a href="#partners">Partners</a>
+    </nav>
+    <button class="onair js-play" type="button" aria-label="Play Muddy's Radio">
+      <span class="onair__dot"></span><span class="onair__label">On Air</span>
+    </button>
+    <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow"><span class="neon-dot"></span> Live in Second Life · 24 / 7 / 365</p>
+      <h1 class="hero__title">
+        The little club with a <span class="neon-blue">big&nbsp;heart.</span>
+      </h1>
+      <p class="hero__lede">
+        Since 2010, Muddy's Music Cafe has been Second Life's home for hand-picked DJs, friendly hosts,
+        and the best in soft rock to pop — <em>70s to today</em>. The music never stops.
+      </p>
+      <div class="hero__cta">
+        <button class="btn btn--primary js-play" type="button">
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          <span class="js-play-label">Listen Live</span>
+        </button>
+        <a class="btn btn--ghost" href="http://world.secondlife.com/group/6ffdf9ce-7581-3731-e601-81ee5f9b6842" target="_blank" rel="noopener">Join our SL Group</a>
+      </div>
+    </div>
+    <div class="hero__logo">
+      <div class="logo-glow" aria-hidden="true"></div>
+      <img src="images/logo.png" alt="Muddy's — Est. 2010" width="520" height="520">
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>Live DJs 24/7</span><i>★</i><span>Soft Rock to Pop</span><i>★</i><span>70s to Today</span><i>★</i><span>Est. 2010</span><i>★</i><span>All Hits All the Time</span><i>★</i><span>Award-Winning</span><i>★</i>
+    <span>Live DJs 24/7</span><i>★</i><span>Soft Rock to Pop</span><i>★</i><span>70s to Today</span><i>★</i><span>Est. 2010</span><i>★</i><span>All Hits All the Time</span><i>★</i><span>Award-Winning</span><i>★</i>
+  </div>
+</div>
+
+<!-- ============ RADIO ============ -->
+<section class="section" id="radio">
+  <div class="container radio">
+    <div class="radio__player">
+      <div class="player">
+        <div class="player__top">
+          <span class="badge badge--live"><span class="neon-dot"></span> Live</span>
+          <span class="player__station">Muddy's Radio</span>
+        </div>
+        <div class="player__art">
+          <img src="images/logo.png" alt="" width="220" height="220">
+          <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p class="player__now js-status">Press play to tune in</p>
+        <div class="player__controls">
+          <button class="player__btn js-play" type="button" aria-label="Play Muddy's Radio">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </button>
+          <label class="vol">
+            <span class="sr-only">Volume</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4zm12.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+            <input type="range" min="0" max="1" step="0.01" value="0.8" class="js-volume">
+          </label>
+        </div>
+        <a class="player__ext" href="http://muddys.digistream.info:20398/index.html?sid=1" target="_blank" rel="noopener">Open stream in a new tab ↗</a>
+      </div>
+    </div>
+    <div class="radio__copy">
+      <p class="eyebrow">Since 2015</p>
+      <h2 class="h2">Take the club <span class="script">home with you</span></h2>
+      <p>
+        Muddy's Radio started as a way for regulars to hear the sounds of the club while building or relaxing
+        in their own homes. Streaming 24 hours a day, 7 days a week, 365 days a year, it's now popular in its own right.
+      </p>
+      <div class="hud">
+        <img src="images/club.png" alt="Two avatars dancing beside the Muddy's Smart HUD at the club" width="300" height="300" loading="lazy">
+        <div>
+          <h3 class="h3">Listen Anywhere HUD</h3>
+          <p>Grab the free Muddy's Smart HUD at the club and take the radio with you anywhere in Second Life. <small>(Media must be enabled.)</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EVENTS ============ -->
+<section class="section section--alt" id="events">
+  <div class="container">
+    <header class="section__head">
+      <p class="eyebrow">What's on</p>
+      <h2 class="h2">Events at <span class="script">Muddy's</span></h2>
+      <p class="section__sub">Parties, contests, roadshows and more. Tap a poster for the full view.</p>
+    </header>
+
+    <div class="events">
+      <article class="event event--feature">
+        <button class="event__img js-lightbox" data-src="images/award4.jpg" data-alt="Muddy's Halloween Block Party poster, October 29th to 31st">
+          <img src="images/award4.jpg" alt="Muddy's Halloween Block Party poster" loading="lazy" width="900" height="900">
+        </button>
+        <div class="event__body">
+          <span class="badge badge--orange">Oct 29 – 31</span>
+          <h3 class="h3">Halloween Block Party</h3>
+          <p>Three nights of trick-or-treat, costumes and spooky sets from our DJs. Come dressed up.</p>
+        </div>
+      </article>
+
+      <article class="event">
+        <button class="event__img js-lightbox" data-src="images/award3.jpg" data-alt="Muddy's Monster Mash-Up Halloween photo contest poster">
+          <img src="images/award3.jpg" alt="Muddy's Monster Mash-Up poster" loading="lazy" width="900" height="900">
+        </button>
+        <div class="event__body">
+          <span class="badge badge--purple">Oct 29 – Nov 1</span>
+          <h3 class="h3">Monster Mash-Up Photo Contest</h3>
+          <p>Dress to distress, pose to impress. Prizes of L$5,000, L$2,500 and L$1,000. Submit to our Flickr group. Original SL photography only, no AI.</p>
+          <a class="link" href="https://www.flickr.com/groups/muddys/" target="_blank" rel="noopener">Submit on Flickr →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <button class="event__img js-lightbox" data-src="images/award1.jpg" data-alt="Muddy's Music Cafe is the official sponsor of Premier Wrestling's Full Circle">
+          <img src="images/award1.jpg" alt="Premier Wrestling Full Circle sponsorship poster" loading="lazy" width="900" height="900">
+        </button>
+        <div class="event__body">
+          <span class="badge badge--blue">Roadshow</span>
+          <h3 class="h3">Road to Full Circle</h3>
+          <p>We're the official sponsor of Premier Wrestling's <strong>Full Circle</strong>. Everyone at the roadshow gets a free Premier Wrestling T-shirt and a chance to win a free ticket.</p>
+          <a class="link" href="https://maps.secondlife.com/secondlife/Premier%20Virtual%20Entertainment/157/153/23" target="_blank" rel="noopener">Teleport to the roadshow →</a>
+        </div>
+      </article>
+
+      <article class="event">
+        <button class="event__img js-lightbox" data-src="images/award2.jpg" data-alt="The 4th Wall Podcast talking to Bridget Hammill of Muddy's">
+          <img src="images/award2.jpg" alt="The 4th Wall Podcast poster" loading="lazy" width="900" height="900">
+        </button>
+        <div class="event__body">
+          <span class="badge badge--pink">In the media</span>
+          <h3 class="h3">The 4th Wall Podcast</h3>
+          <p>BK and Paul sit down with owner Bridget Hammill to talk about Muddy's, the music, and 16 years on the grid.</p>
+          <a class="link" href="https://www.youtube.com/watch?v=D2rIlQpxip8" target="_blank" rel="noopener">Watch on YouTube →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ON THE ROAD ============ -->
+<section class="section road">
+  <div class="container road__inner">
+    <div class="road__copy">
+      <p class="eyebrow">Muddy's on the road</p>
+      <h2 class="h2">We bring the <span class="script">party to you</span></h2>
+      <p>Muddy's hits the road with guest sets at venues across the grid. Next stop: <strong>Cloud Nine</strong>, with DJ John and host Amfie streaming live on Sunday, October 25th, 1:45 – 4:00 PM SLT.</p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="https://maps.secondlife.com/secondlife/GoodVibes/125/127/21" target="_blank" rel="noopener">Teleport to Cloud Nine</a>
+        <a class="btn btn--ghost" href="https://soundcloud.com/user-680512645/muddys-radio-cloud-9" target="_blank" rel="noopener">Hear it on SoundCloud</a>
+      </div>
+    </div>
+    <button class="road__poster js-lightbox" data-src="images/cloud-nine.jpg" data-alt="Muddy's Music Cafe is hitting the road — Cloud Nine, Sunday October 25th">
+      <img src="images/cloud-nine.jpg" alt="Muddy's on the road at Cloud Nine poster" loading="lazy" width="900" height="900">
+    </button>
+  </div>
+</section>
+
+<!-- ============ STORY ============ -->
+<section class="section section--alt" id="story">
+  <div class="container">
+    <div class="story">
+      <div class="story__media">
+        <img src="images/owner-beth.jpg" alt="Owner Bridget Hammill beside the glowing Muddy's sign" loading="lazy" width="900" height="450">
+      </div>
+      <div class="story__copy">
+        <p class="eyebrow">Our story</p>
+        <h2 class="h2">From humble beginnings to <span class="script">award-winning</span></h2>
+        <p>Founded in 2010, Muddy's has grown into one of the most popular and loved music venues in Second Life. Under the careful stewardship of owner <strong>Bridget Hammill</strong>, the club has gone from strength to strength, winning every major award along the way.</p>
+        <p>The friendly atmosphere, our hand-picked DJs and hosts, and a quietly efficient staff keep the music going around the clock. Here's to the next ten years and beyond.</p>
+        <p class="signoff">From Muddy and me, thank you. <span class="script">— Beth</span></p>
+      </div>
+    </div>
+
+    <dl class="stats">
+      <div><dt>Since</dt><dd>2010</dd></div>
+      <div><dt>Live DJs</dt><dd>24/7</dd></div>
+      <div><dt>Days a year</dt><dd>365</dd></div>
+      <div><dt>Partners</dt><dd>100+</dd></div>
+    </dl>
+
+    <div class="muddy">
+      <img src="images/home-photo.jpg" alt="Muddy the chocolate labrador sitting in front of his doghouse" loading="lazy" width="600" height="744">
+      <div>
+        <p class="eyebrow">Meet the boss</p>
+        <h3 class="h2">This is <span class="script">Muddy.</span></h3>
+        <p>The club's namesake and resident good boy. You'll usually find him by his doghouse, keeping an eye on the dance floor. Give him a pat when you visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GIVING BACK ============ -->
+<section class="section" id="giving">
+  <div class="container giving">
+    <div class="giving__copy">
+      <p class="eyebrow">Giving back</p>
+      <h2 class="h2">Always keen to support <span class="script">SL charities</span></h2>
+      <p>Muddy's is proud to be the <strong>official radio station of the American Cancer Society of Second Life</strong>, supporting Relay For Life and Strides. Together we celebrate survivors, remember loved ones, and keep fighting for a cure.</p>
+    </div>
+    <div class="giving__media">
+      <button class="js-lightbox" data-src="images/acs.jpg" data-alt="Muddy's Music Cafe is the official radio station for the American Cancer Society of SL">
+        <img src="images/acs.jpg" alt="Official radio station for the American Cancer Society of SL poster" loading="lazy" width="900" height="900">
+      </button>
+      <button class="js-lightbox" data-src="images/charities.jpg" data-alt="Muddy's charity support">
+        <img src="images/charities.jpg" alt="Muddy's charity support board" loading="lazy" width="699" height="843">
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section class="section section--alt" id="team">
+  <div class="container team">
+    <div class="team__card">
+      <p class="eyebrow">Now hiring</p>
+      <h2 class="h2">DJs &amp; Hosts <span class="script">wanted</span></h2>
+      <p class="big">You keep all the tips.</p>
+      <ul class="checks">
+        <li>Must have experience</li>
+        <li>Able to work a busy 24/7 club</li>
+        <li>PG venue</li>
+      </ul>
+      <p>Contact <strong>Bridget Hammill</strong> in Second Life for more information.</p>
+    </div>
+    <div class="team__copy">
+      <h3 class="h3">The people behind the music</h3>
+      <p>Every DJ and host at Muddy's is hand-picked. They're the reason regulars keep coming back, and the reason first-timers become regulars.</p>
+      <div class="team__links">
+        <a class="tile" href="djs.html"><span>Our 22 DJs</span><b>→</b></a>
+        <a class="tile" href="hosts.html"><span>Our 28 Hosts</span><b>→</b></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARTNERS ============ -->
+<section class="section" id="partners">
+  <div class="container">
+    <header class="section__head">
+      <p class="eyebrow">Business partners</p>
+      <h2 class="h2">Grow with <span class="script">Muddy's Radio</span></h2>
+      <p class="section__sub">Our radio is going grid-wide. Partners get free or discounted advertising, chosen because they're excellent at what they do and have the track record to prove it.</p>
+    </header>
+    <div class="partners js-partners" aria-label="Some of our business partners"></div>
+    <div class="partners__cta">
+      <p>Want to reach Muddy's listeners without costing you a penny?</p>
+      <a class="btn btn--primary" href="http://world.secondlife.com/group/6ffdf9ce-7581-3731-e601-81ee5f9b6842" target="_blank" rel="noopener">Contact Bridget Hammill in SL</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <img src="images/logo.png" alt="Muddy's — Est. 2010" width="120" height="120">
+      <p>A little club in Second Life<br>with a big heart.</p>
+    </div>
+    <div class="footer__social">
+      <a href="https://www.facebook.com/Muddysmusiccafe" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.7-4.5 4.5V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.7c0-.5.3-.7.5-.7z"/></svg>
+        Facebook
+      </a>
+      <a href="http://world.secondlife.com/group/6ffdf9ce-7581-3731-e601-81ee5f9b6842" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4zm8 0h-1c1.2.9 2 2 2 4v3h7v-3c0-2.7-5.3-4-8-4z"/></svg>
+        SL Group
+      </a>
+      <a href="https://www.flickr.com/groups/muddys/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/></svg>
+        Flickr
+      </a>
+      <a href="https://www.youtube.com/watch?v=D2rIlQpxip8" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8zM9.7 15V9l5.8 3-5.8 3z"/></svg>
+        YouTube
+      </a>
+    </div>
+    <p class="footer__copy">© <span class="js-year">2026</span> Muddy's Music Cafe · Est. 2010 · Second Life</p>
+  </div>
+</footer>
+
+<!-- Poster lightbox -->
+<dialog class="lightbox" id="lightbox">
+  <button class="lightbox__close" type="button" aria-label="Close">×</button>
+  <img src="" alt="">
+</dialog>
+
+<script src="script.js"></script>
+
+</body>
+</html>
