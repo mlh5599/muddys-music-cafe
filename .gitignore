@@ -14,7 +14,8 @@ secrets/
 *.secret
 
 # Runtime data
-data/
+/data/
+/server/data/
 *.db
 *.db-shm
 *.db-wal
