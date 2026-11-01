@@ -52,7 +52,7 @@ func TestHome(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		"Halloween Block Party", "Oct 29 – 31", "Monster Mash-Up Photo Contest", "Submit on Flickr →",
-		"Gacha Shack", "Our 22 DJs", "Our 28 Hosts", `data-stream="http://muddys.digistream.info:20398/stream"`,
+		"Gacha Shack", "Our 22 DJs", "Our 28 Hosts", `data-stream="/radio/stream"`,
 		"Must have experience", "/uploads/",
 	} {
 		if !strings.Contains(body, want) {
@@ -193,5 +193,66 @@ func TestTeaser(t *testing.T) {
 	got := teaser([]string{long})
 	if !strings.HasSuffix(got, "…") || len([]rune(got)) > 121 {
 		t.Errorf("teaser = %q", got)
+	}
+}
+
+func TestRadioRelay(t *testing.T) {
+	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Icy-MetaData") != "" {
+			t.Error("relay asked upstream for metadata")
+		}
+		w.Header().Set("Content-Type", "audio/mpeg")
+		w.Header().Set("icy-name", "secret")
+		w.Write([]byte("ID3-fake-audio-bytes"))
+	}))
+	defer up.Close()
+
+	s, _ := newSeededSite(t, time.Date(2026, 10, 30, 12, 0, 0, 0, time.UTC))
+	if err := s.settings.SetMany(context.Background(), map[string]string{storage.SettingRadioStreamURL: up.URL + "/stream"}); err != nil {
+		t.Fatal(err)
+	}
+	rec := get(s, "/radio/stream?t=123")
+	if rec.Code != 200 || rec.Body.String() != "ID3-fake-audio-bytes" {
+		t.Fatalf("relay = %d %q", rec.Code, rec.Body)
+	}
+	if rec.Header().Get("Content-Type") != "audio/mpeg" || rec.Header().Get("Cache-Control") != "no-store" {
+		t.Errorf("headers: %v", rec.Header())
+	}
+	if rec.Header().Get("icy-name") != "" {
+		t.Error("upstream headers leaked")
+	}
+}
+
+func TestRadioRelayUnavailable(t *testing.T) {
+	s, _ := newSeededSite(t, time.Date(2026, 10, 30, 12, 0, 0, 0, time.UTC))
+	ctx := context.Background()
+
+	if err := s.settings.SetMany(ctx, map[string]string{storage.SettingRadioStreamURL: ""}); err != nil {
+		t.Fatal(err)
+	}
+	if rec := get(s, "/radio/stream"); rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("unset stream = %d", rec.Code)
+	}
+	if body := get(s, "/").Body.String(); strings.Contains(body, "data-stream") {
+		t.Error("player given a stream address while none is set")
+	}
+
+	down := httptest.NewServer(http.NotFoundHandler())
+	defer down.Close()
+	if err := s.settings.SetMany(ctx, map[string]string{storage.SettingRadioStreamURL: down.URL}); err != nil {
+		t.Fatal(err)
+	}
+	if rec := get(s, "/radio/stream"); rec.Code != http.StatusBadGateway {
+		t.Errorf("upstream 404 = %d", rec.Code)
+	}
+}
+
+func TestRadioRelayListenerCap(t *testing.T) {
+	s, _ := newSeededSite(t, time.Date(2026, 10, 30, 12, 0, 0, 0, time.UTC))
+	for i := 0; i < maxListeners; i++ {
+		s.listeners <- struct{}{}
+	}
+	if rec := get(s, "/radio/stream"); rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("over cap = %d", rec.Code)
 	}
 }

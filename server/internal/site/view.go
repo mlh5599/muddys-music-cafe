@@ -70,10 +70,13 @@ func (s *Site) loadCommon(ctx context.Context, title, description string) (commo
 	}
 	c := common{
 		Title: title, Description: description, Version: s.version, SiteURL: strings.TrimRight(s.cfg.SiteURL, "/"), Year: s.cfg.Now().In(loc).Year(),
-		StreamURL: set[storage.SettingRadioStreamURL], StatusURL: set[storage.SettingRadioStatusURL],
+		StatusURL: set[storage.SettingRadioStatusURL],
 		ClubSLurl: set[storage.SettingClubSLurl], SLGroupURL: set[storage.SettingSLGroupURL],
 		FacebookURL: set[storage.SettingFacebookURL], FlickrURL: set[storage.SettingFlickrURL],
 		YouTubeURL: set[storage.SettingYouTubeURL], Hiring: lines(set[storage.SettingHiringText]),
+	}
+	if strings.TrimSpace(set[storage.SettingRadioStreamURL]) != "" {
+		c.StreamURL = radioPath // the player uses our https relay, not the raw address
 	}
 	return c, set, loc, nil
 }

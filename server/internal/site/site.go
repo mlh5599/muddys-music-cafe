@@ -49,6 +49,7 @@ type Site struct {
 
 	home, staffPage *template.Template
 	version         string
+	listeners       chan struct{}
 	mux             *http.ServeMux
 }
 
@@ -58,12 +59,13 @@ func New(cfg Config) (*Site, error) {
 		cfg.Now = time.Now
 	}
 	s := &Site{
-		cfg:      cfg,
-		events:   storage.NewEventStore(cfg.DB),
-		staff:    storage.NewStaffStore(cfg.DB),
-		partners: storage.NewPartnerStore(cfg.DB),
-		settings: storage.NewSettingsStore(cfg.DB),
-		images:   storage.NewImageStore(cfg.DB),
+		cfg:       cfg,
+		events:    storage.NewEventStore(cfg.DB),
+		staff:     storage.NewStaffStore(cfg.DB),
+		partners:  storage.NewPartnerStore(cfg.DB),
+		settings:  storage.NewSettingsStore(cfg.DB),
+		images:    storage.NewImageStore(cfg.DB),
+		listeners: make(chan struct{}, maxListeners),
 	}
 	var err error
 	if s.home, err = parseTemplate("home.html"); err != nil {
@@ -81,6 +83,7 @@ func New(cfg Config) (*Site, error) {
 	s.mux.HandleFunc("GET /djs", s.serveStaff(storage.StaffKindDJ))
 	s.mux.HandleFunc("GET /hosts", s.serveStaff(storage.StaffKindHost))
 	s.mux.Handle("GET /static/", s.staticHandler())
+	s.mux.HandleFunc("GET "+radioPath, s.serveRadio)
 	s.mux.HandleFunc("GET /uploads/{name}", s.serveUpload)
 	s.mux.HandleFunc("/", http.NotFound)
 	return s, nil

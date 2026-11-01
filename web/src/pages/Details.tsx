@@ -5,7 +5,7 @@ import type { Settings } from '../api'
 import { Button, errorText, Loading, Page, TextArea, TextField, useLoad, useNotify } from '../ui'
 
 const links: { key: string; label: string; help?: string }[] = [
-  { key: 'radio_stream_url', label: 'Radio stream address', help: 'The address the website’s player plays. It should start with https:// to work on the website.' },
+  { key: 'radio_stream_url', label: 'Radio stream address', help: 'The address the website’s player plays. Either http:// or https:// works.' },
   { key: 'radio_status_url', label: 'Radio page address', help: 'Where “open in a new tab” goes.' },
   { key: 'club_slurl', label: 'Teleport link to Muddy’s', help: 'The Second Life link people click to visit the club.' },
   { key: 'sl_group_url', label: 'Second Life group link' },
