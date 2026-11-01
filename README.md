@@ -36,6 +36,7 @@ docker run --rm -p 8080:8080 -v "$PWD/data:/data" muddys:local
 - [Admin usability requirements](docs/admin-usability.md): what the admin must be like to use
 - [Security and credentials](docs/security.md): rules for this public repo and how the admin is protected
 - [Development](docs/development.md): build, test, run, container, backup and restore
+- [CI/CD and deployment](docs/deployment.md): release PR approval, image publishing, push deploys, migrations and rollback
 - [Status and roadmap](docs/roadmap.md): what is done and what is left
 
 Open work is tracked in [GitHub issues](https://github.com/mlh5599/muddys-music-cafe/issues).
