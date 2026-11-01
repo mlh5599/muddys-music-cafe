@@ -2,7 +2,7 @@
 
 How a change gets from a pull request to production. The repo contains nothing specific to where it is hosted (see [security.md](security.md)): hostnames, addresses and tokens live in GitHub Environment secrets and in the private hosting configuration, never here.
 
-**Status:** designed, not yet built. The pieces are tracked in the implementation issue. Today the image is built in CI but not published, and a release is a manual redeploy.
+**Status:** the application side is built and live: every merge to `main` builds, scans, signs and publishes the image and cuts a GitHub Release. The automatic deploy job is switched off (repository variable `DEPLOY_ENABLED`) until the host runs the deploy receiver; see [Turning deploys on](#turning-deploys-on).
 
 ## Principles
 
@@ -29,7 +29,7 @@ flowchart LR
     hook --> run[Pull by digest, verify<br/>signature, back up, migrate,<br/>health check]
     run -->|ok| done([Live])
     run -->|unhealthy| rb[Roll back to<br/>previous image]
-    run -.->|result| gh[GitHub Deployments]
+    run -.->|polled result| gh[Action run + GitHub Deployment]
     rb -.-> gh
 ```
 
@@ -78,9 +78,7 @@ sequenceDiagram
     participant R as Deploy receiver<br/>(on the host)
     participant S as Deploy script
     participant D as Docker + app
-    participant API as GitHub Deployments API
 
-    GH->>API: create deployment (in_progress)
     GH->>CF: POST /deploy {tag, digest}<br/>service token + HMAC signature
     CF->>R: forward (token valid)
     R->>R: verify HMAC, tag format, take lock
@@ -92,14 +90,18 @@ sequenceDiagram
     D->>D: back up DB, apply migrations
     S->>D: wait for healthy
     alt healthy
-        S->>API: status: success
+        S->>R: result: succeeded
     else unhealthy or timeout
         S->>D: restore previous image
-        S->>API: status: failure (rolled back)
+        S->>R: result: failed (rolled back)
+    end
+    loop until finished
+        GH->>CF: GET /deploy/{id} (signed)
+        CF->>R: status and log
     end
 ```
 
-The request returns `202` immediately and the host reports the outcome afterwards, because Cloudflare cuts proxied requests at about 100 seconds and a deploy can take longer. The Action run turns green or red from the Deployments status, so the real outcome is visible in GitHub.
+The request returns `202` and a deploy id immediately, because Cloudflare cuts proxied requests at about 100 seconds and a deploy can take longer. The Action then asks the receiver for that id's status over the same signed, tunnelled path until it finishes, prints the deploy log, and goes green or red. The host holds no GitHub credential at all. The job runs in the `production` environment, so GitHub records it as a Deployment and the outcome is visible in GitHub.
 
 ### Concurrency
 
@@ -121,11 +123,11 @@ The receiver is a network-reachable path to "run a deploy", so it is deliberatel
 
 | Piece | Location |
 |---|---|
-| Workflow: build, sign, tag, deploy call | this repo (`.github/workflows/`) |
+| Workflow: build, sign, tag, deploy call | this repo (`.github/workflows/`, `.github/actions/deploy`) |
+| Deploy receiver (`server/cmd/deployhook`) and deploy script (`deploy/deploy.sh`) | this repo; published as assets of every GitHub Release |
 | Hook URL, access token, HMAC secret | GitHub Environment `production` secrets |
 | Environment rule: deploy only from `main` | GitHub Environment `production` |
-| Receiver, deploy script, tunnel route, access policy | private hosting configuration, not this repo |
-| Token for writing Deployment status | host-side secret, scoped to `deployments: write` on this repo only |
+| Installing the receiver, tunnel route, access policy, host paths | private hosting configuration, not this repo |
 
 ## Database migrations
 
@@ -154,10 +156,19 @@ Migrations already run automatically: `storage.Open` applies every embedded `NNN
 - **GHCR availability:** if the registry is down, the deploy fails and the running release is untouched.
 - **Frequent deploys:** every deploy restarts the app, briefly dropping live radio listeners. Acceptable at current scale; worth revisiting if deploys become frequent or the audience grows.
 
-## Implementation order
+## Turning deploys on
 
-1. App: pre-migration backup and downgrade guard, plus the migration CI test.
-2. Workflow: build once on `main`, smoke test, scan, push, sign, tag; branch protection on `main`.
-3. Hosting: receiver, deploy script, tunnel route and access policy; switch the app from build-on-host to pulling the signed image, with a compose health check.
-4. Workflow: `production` environment, deploy job, Deployments status, manual redeploy-a-tag dispatch.
-5. Dry run with a throwaway change, including a deliberately failing health check to prove the rollback.
+The `deploy` job runs only when the repository variable `DEPLOY_ENABLED` is `true`, so the pipeline can ship images before a host is listening. Once the host side is installed:
+
+1. Set the `production` environment secrets: `DEPLOY_URL`, `DEPLOY_ACCESS_CLIENT_ID`, `DEPLOY_ACCESS_CLIENT_SECRET`, `DEPLOY_HMAC_SECRET` (the HMAC value must match the receiver's secret).
+2. Set the repository variable `DEPLOY_ENABLED=true`.
+3. Dry run: merge a trivial change and watch the Action; then prove the rollback with a deliberately failing health check, including one after a migration.
+
+The receiver and script are built from this repo and attached to every release (`deployhook`, `deploy.sh`, `SHA256SUMS`). `deploy/deploy.sh` documents the environment it expects; `deploy/test-deploy.sh` exercises it against stubbed Docker and cosign, including rollback.
+
+## How it is enforced
+
+- Ruleset on `main`: pull requests only, `test` and `docker` checks required, branch must be up to date, no force push or deletion.
+- `production` environment: deployments only from `main`.
+- `release.yml` is the signer identity `deploy.sh` accepts; renaming that file means updating the script.
+- The smoke test (`scripts/smoke-test.sh`) starts the built image on an empty data dir and checks `/healthz`, the public site and the admin API. It does not reach the radio upstream, which CI cannot depend on; the relay itself is covered by the Go tests.
