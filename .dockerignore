@@ -1,0 +1,7 @@
+.git
+poc
+data
+bin
+web/node_modules
+server/internal/webui/dist/assets
+.env*

@@ -1,0 +1,13 @@
+/* All colors and fonts live here as CSS custom properties; components never
+   hardcode them. Values match the public site's dark nightclub palette. */
+:root {
+  --color-bg: #0b0b0d;
+  --color-surface: #17171b;
+  --color-text: #f4eee2;
+  --color-muted: #a8a294;
+  --color-accent: #ffc24b;
+  --color-accent-2: #49c6ff;
+  --color-danger: #ff5a3c;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius: 12px;
+}

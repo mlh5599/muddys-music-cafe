@@ -22,4 +22,8 @@ uploads/
 
 # Build output
 bin/
-web/node_modules/
+
+# Built admin bundle is build output; dist/index.html stays tracked as a placeholder.
+/server/internal/webui/dist/assets/
+
+node_modules/
