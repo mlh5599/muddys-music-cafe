@@ -129,7 +129,7 @@ Alfa Slab One (headings), Yellowtail (script accents), Inter (body). See
 - [x] **Phase 3: Seed import.** `server -seed` loads the POC's 22 DJs, 28 hosts, 84 partners, events and settings into an empty database (refuses if content exists).
 - [x] **Phase 4: Public pages.** `/`, `/djs`, `/hosts` rendered from the database; static assets and uploads served with caching; visual check against the POC done.
 - [x] **Phase 5: Admin API + uploads.** JSON CRUD for events, DJs, hosts, partners and settings under `/api/admin`; picture upload (validated by content, rotated, resized, re-encoded); every route requires the access gate's signed identity assertion plus a CSRF check; locked unless configured (`-access-team-domain`, `-access-aud`).
-- [ ] **Phase 6: Admin UI.** Events, DJs, hosts, partners, settings.
+- [x] **Phase 6: Admin UI.** Events, DJs, hosts, partners and website details, in plain language with pickers, big buttons, confirm-before-delete and a "Saved" message.
 - [ ] **Phase 7: Containerize.** Verify the image builds and runs with a mounted data dir.
 - [ ] **Phase 8: Deploy.** Done outside this repo, with `/admin` behind an access gate.
 - [ ] **Phase 9: Handover.** Walk the owner through editing; backup/restore notes.

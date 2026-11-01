@@ -1,13 +1,23 @@
 /* All colors and fonts live here as CSS custom properties; components never
-   hardcode them. Values match the public site's dark nightclub palette. */
+   hardcode them. Light, high-contrast and calm on purpose. */
 :root {
-  --color-bg: #0b0b0d;
-  --color-surface: #17171b;
-  --color-text: #f4eee2;
-  --color-muted: #a8a294;
-  --color-accent: #ffc24b;
-  --color-accent-2: #49c6ff;
-  --color-danger: #ff5a3c;
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --radius: 12px;
+  --color-bg: #faf6ee;
+  --color-surface: #ffffff;
+  --color-text: #1d1a17;
+  --color-muted: #5f5850;
+  --color-line: #d9d0c1;
+  --color-accent: #b4560a;
+  --color-accent-text: #ffffff;
+  --color-good: #1c6b3a;
+  --color-good-bg: #e2f3e8;
+  --color-warn-bg: #fff1d6;
+  --color-danger: #b3261e;
+  --color-danger-bg: #fde8e6;
+  --color-focus: #1a5fd0;
+  --badge-orange: #e8741c;
+  --badge-purple: #8e44d6;
+  --badge-blue: #1b86c4;
+  --badge-pink: #d6338a;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius: 14px;
 }
