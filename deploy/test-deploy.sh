@@ -63,7 +63,7 @@ check() { # check NAME CONDITION...
 current_image() { sed -n 's/^MUDDYS_IMAGE=//p' "$work/app/.deploy.env"; }
 db() { cat "$work/app/data/muddys.db"; }
 
-sleep() { :; } # the real script's sleep is also stubbed out via PATH below
+# sleep is stubbed out via PATH so the script's waits cost nothing
 cat > "$work/bin/sleep" <<'S'
 #!/bin/sh
 exit 0
