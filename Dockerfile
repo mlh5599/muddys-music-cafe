@@ -6,7 +6,7 @@ COPY web ./web
 COPY server/internal/webui/embed.go ./server/internal/webui/embed.go
 RUN cd web && npm run build
 
-FROM golang:1.26.5-alpine3.24 AS server-build
+FROM golang:1.27.3-alpine3.24 AS server-build
 WORKDIR /src
 COPY server ./server
 COPY --from=web-build /src/server/internal/webui/dist ./server/internal/webui/dist
